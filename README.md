@@ -1,9 +1,10 @@
+
 # Dự án Trình diễn 3D với Hiệu ứng Cuộn Chuột
 
 Đây là một dự án web demo, trình diễn cách sử dụng các công nghệ web hiện đại để tạo ra một trang web tương tác, nơi người dùng có thể điều khiển một hoạt cảnh 3D bằng cách cuộn chuột. Dự án này lấy cảm hứng từ các trang giới thiệu sản phẩm của Apple hoặc các trang web portfolio sáng tạo.
 
+![Portfolio Screenshot](gif.gif)
 
-![Portfolio Screenshot](screenshot.png)
 
 ## Công nghệ sử dụng
 
@@ -103,6 +104,8 @@ function animate() {
 }
 ```
 Nhiệm vụ của nó rất đơn giản: "Mỗi frame, hãy vẽ lại sân khấu (`scene`) từ góc nhìn của máy quay (`camera`)". Điều này đảm bảo rằng mọi thay đổi về vị trí/xoay của camera hoặc mô hình (do GSAP điều khiển) sẽ được hiển thị ngay lập tức trên màn hình.
+
+![Portfolio Screenshot](screenshot.png)
 
 ## Tùy chỉnh Dự án
 
