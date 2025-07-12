@@ -3,7 +3,7 @@
 Đây là một dự án web demo, trình diễn cách sử dụng các công nghệ web hiện đại để tạo ra một trang web tương tác, nơi người dùng có thể điều khiển một hoạt cảnh 3D bằng cách cuộn chuột. Dự án này lấy cảm hứng từ các trang giới thiệu sản phẩm của Apple hoặc các trang web portfolio sáng tạo.
 
 
-![Portfolio Screenshot](screenshot.PNG)
+![Portfolio Screenshot](screenshot.png)
 
 ## Công nghệ sử dụng
 
