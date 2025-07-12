@@ -2,11 +2,10 @@
 gsap.registerPlugin(ScrollTrigger);
 
 // --------------------------------------------------------------------
-// 1. THIẾT LẬP CẢNH 3D CƠ BẢN
+// 1. THIẾT LẬP CẢNH 3D
 // --------------------------------------------------------------------
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-// Vẫn giữ camera ở xa để đảm bảo thấy mô hình lúc đầu
 camera.position.set(0, 5, 30); 
 
 const renderer = new THREE.WebGLRenderer({
@@ -17,31 +16,30 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
+// ***** KHỞI TẠO ORBIT CONTROLS *****
+// Truyền vào camera và canvas để nó biết cần điều khiển cái gì và lắng nghe sự kiện ở đâu
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; // Tạo ra hiệu ứng "quán tính" mượt mà khi xoay
+controls.enablePan = false; // Tắt tính năng kéo (pan) để người dùng không kéo Kirov ra khỏi màn hình
+controls.minDistance = 10; // Ngăn người dùng zoom quá gần
+controls.maxDistance = 150; // Ngăn người dùng zoom quá xa
+
+// Ánh sáng và Skybox (giữ nguyên)
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
 scene.add(ambientLight);
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
-directionalLight.position.set(10, 10, 5); // Thay đổi hướng sáng một chút
+directionalLight.position.set(10, 10, 5);
 scene.add(directionalLight);
 
-// --------------------------------------------------------------------
-// THÊM SKYBOX
-// --------------------------------------------------------------------
 const cubeTextureLoader = new THREE.CubeTextureLoader();
 cubeTextureLoader.setPath('air-skybox/'); 
-
-// ***** THAY ĐỔI DUY NHẤT: CẬP NHẬT TÊN FILE SKYBOX MỚI *****
-// Chúng ta thay đổi tên file để khớp với bộ ảnh bạn vừa tải về.
 const textureCube = cubeTextureLoader.load([
     'px.png', 'nx.png', 'py.png', 'ny.png', 'pz.png', 'nz.png'
 ]);
-
-// Đặt skybox làm background cho scene
 scene.background = textureCube;
-// ***** KẾT THÚC THAY ĐỔI *****
-
 
 // --------------------------------------------------------------------
-// 2. TẢI MÔ HÌNH 3D MỚI
+// 2. TẢI MÔ HÌNH (Giữ nguyên)
 // --------------------------------------------------------------------
 const loader = new THREE.GLTFLoader();
 let newModel;
@@ -50,11 +48,9 @@ loader.load(
     'models/air_ship_1K.glb',
     function (gltf) {
         newModel = gltf.scene;
-        
         newModel.position.set(0, -2, 0);
         newModel.scale.set(1, 1, 1); 
         newModel.rotation.set(0, Math.PI / 2, 0);
-        
         scene.add(newModel);
         setupScrollAnimation();
     },
@@ -63,10 +59,12 @@ loader.load(
 );
 
 // --------------------------------------------------------------------
-// 3. THIẾT LẬP LẠI HIỆU ỨNG CUỘN (GIỮ NGUYÊN)
+// 3. THIẾT LẬP HIỆU ỨNG CUỘN (CÓ THAY ĐỔI NHỎ)
 // --------------------------------------------------------------------
 function setupScrollAnimation() {
+    // ***** THÊM ID CHO TIMELINE ĐỂ CÓ THỂ ĐIỀU KHIỂN NÓ *****
     const tl = gsap.timeline({
+        id: "main-timeline", // Đặt một cái tên cho timeline
         scrollTrigger: {
             trigger: 'main',
             start: 'top top',
@@ -76,6 +74,7 @@ function setupScrollAnimation() {
         }
     });
 
+    // Các animation giữ nguyên
     tl
     .to(camera.position, { z: 20, y: 3 })
     .to(camera.position, { x: -15 })
@@ -88,14 +87,40 @@ function setupScrollAnimation() {
     .to(camera.rotation, { x: 0 }, "<");
 }
 
+// ***** GIẢI QUYẾT XUNG ĐỘT GIỮA SCROLL VÀ KÉO CHUỘT *****
+controls.addEventListener('start', () => {
+  // Khi người dùng bắt đầu kéo chuột, vô hiệu hóa animation cuộn
+  console.log("OrbitControls started, ScrollTrigger disabled.");
+  const mainTimeline = ScrollTrigger.getById("main-timeline");
+  if (mainTimeline) {
+    mainTimeline.disable();
+  }
+});
+
+controls.addEventListener('end', () => {
+  // Khi người dùng thả chuột, kích hoạt lại animation cuộn
+  console.log("OrbitControls ended, ScrollTrigger enabled.");
+  const mainTimeline = ScrollTrigger.getById("main-timeline");
+  if (mainTimeline) {
+    mainTimeline.enable();
+  }
+});
+
+
 // --------------------------------------------------------------------
-// 4. VÒNG LẶP RENDER VÀ RESIZE (GIỮ NGUYÊN)
+// 4. VÒNG LẶP RENDER (CÓ THAY ĐỔI)
 // --------------------------------------------------------------------
 function animate() {
     requestAnimationFrame(animate);
+
+    // ***** CẬP NHẬT ORBIT CONTROLS TRONG MỖI FRAME *****
+    // Điều này là bắt buộc nếu bạn bật `enableDamping`
+    controls.update();
+
     renderer.render(scene, camera);
 }
 
+// Các hàm còn lại giữ nguyên
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
